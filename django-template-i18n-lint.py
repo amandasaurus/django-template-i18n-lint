@@ -32,9 +32,6 @@ GOOD_STRINGS = re.compile(
          # already translated text
         |{%\ ?blocktrans.*?{%\ ?endblocktrans\ ?%}
 
-         # our custom block for adding css classes 
-        |{%\ block\ bodyclass\ %}.*?{%\ endblock\ bodyclass\ %}
-
          # any django template function (catches {% trans ..) aswell
         |{%.*?%}
 
