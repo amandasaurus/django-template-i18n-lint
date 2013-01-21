@@ -1,9 +1,11 @@
 #! /usr/bin/python
 """
-Prints out all 
+Prints out all
 """
 
-import sys, re
+import re
+import sys
+from optparse import OptionParser
 
 
 def location(str, pos):
@@ -22,7 +24,7 @@ def location(str, pos):
             counter += 1
 
     return lineno, charpos
-        
+
 # Things that are OK:
 GOOD_STRINGS = re.compile(
     r"""
@@ -35,7 +37,10 @@ GOOD_STRINGS = re.compile(
          # any django template function (catches {% trans ..) aswell
         |{%.*?%}
 
-         # JS 
+         # CSS
+        |<style.*?</style>
+
+         # JS
         |<script.*?</script>
 
          # A html title or value attribute that's been translated
@@ -46,6 +51,9 @@ GOOD_STRINGS = re.compile(
 
          # An <option> value tag
         |<option[^<>]+?value="[^"]*?"
+
+         # Any html attribute that's not value or title
+        |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)='[^']*?'
 
          # Any html attribute that's not value or title
         |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)="[^"]*?"
@@ -83,10 +91,28 @@ GOOD_STRINGS = re.compile(
         )""",
 
     # MULTILINE to match across lines and DOTALL to make . include the newline
-    re.MULTILINE|re.DOTALL|re.VERBOSE) 
+    re.MULTILINE|re.DOTALL|re.VERBOSE)
 
 # Stops us matching non-letter parts, e.g. just hypens, full stops etc.
 LETTERS = re.compile("\w")
+
+
+def replace_strings(filename):
+    full_text_lines = []
+    for index, message in enumerate(GOOD_STRINGS.split(open(filename).read())):
+        if index % 2 == 0 and re.search("\w", message):
+            before, message, after = re.match("^(\s*)(.*?)(\s*)$", message, re.DOTALL).groups()
+            message = message.strip().replace("\n", "").replace("\r", "")
+            change = raw_input("Make '%s' translatable? [Y/n] " % message)
+            if change == 'y' or change == "":
+                message = '%s{%% trans "%s" %%}%s' % (before, message, after)
+        full_text_lines.append(message)
+
+    full_text = "".join(full_text_lines)
+    save_filename = filename.split(".")[0] + "_translated.html"
+    open(save_filename, 'w').write(full_text)
+    print "Fully translated! Saved as: %s" % save_filename
+
 
 def non_translated_text(filename):
 
@@ -102,13 +128,22 @@ def non_translated_text(filename):
             if LETTERS.search(match):
                 lineno, charpos = location(template, offset)
                 yield (lineno, charpos, match.strip().replace("\n", "").replace("\r", "")[:120])
-            
 
         offset += len(match)
 
 
-if __name__ == '__main__':
-    filename = sys.argv[1]
+def print_strings(filename):
     for lineno, charpos, message in non_translated_text(filename):
         print "%s:%s:%s:%s" % (filename, lineno, charpos, message)
 
+if __name__ == '__main__':
+    parser = OptionParser(usage="usage: %prog [options] <filename>")
+    parser.add_option("-r", "--replace", action="store_true", dest="replace",
+            help="Ask to replace the strings in the file.", default=False)
+    (options, args) = parser.parse_args()
+    if len(args) != 1:
+        parser.error("incorrect number of arguments")
+    if options.replace:
+        replace_strings(args[0])
+    else:
+        print_strings(args[0])
