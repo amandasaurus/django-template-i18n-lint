@@ -1,6 +1,6 @@
 #! /usr/bin/python
 """
-Prints out all 
+Prints out all
 """
 
 import sys, re
@@ -22,7 +22,7 @@ def location(str, pos):
             counter += 1
 
     return lineno, charpos
-        
+
 # Things that are OK:
 GOOD_STRINGS = re.compile(
     r"""
@@ -35,7 +35,10 @@ GOOD_STRINGS = re.compile(
          # any django template function (catches {% trans ..) aswell
         |{%.*?%}
 
-         # JS 
+         # CSS
+        |<style.*?</style>
+
+         # JS
         |<script.*?</script>
 
          # A html title or value attribute that's been translated
@@ -46,6 +49,9 @@ GOOD_STRINGS = re.compile(
 
          # An <option> value tag
         |<option[^<>]+?value="[^"]*?"
+
+         # Any html attribute that's not value or title
+        |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)='[^']*?'
 
          # Any html attribute that's not value or title
         |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)="[^"]*?"
@@ -83,7 +89,7 @@ GOOD_STRINGS = re.compile(
         )""",
 
     # MULTILINE to match across lines and DOTALL to make . include the newline
-    re.MULTILINE|re.DOTALL|re.VERBOSE) 
+    re.MULTILINE|re.DOTALL|re.VERBOSE)
 
 # Stops us matching non-letter parts, e.g. just hypens, full stops etc.
 LETTERS = re.compile("\w")
@@ -102,7 +108,7 @@ def non_translated_text(filename):
             if LETTERS.search(match):
                 lineno, charpos = location(template, offset)
                 yield (lineno, charpos, match.strip().replace("\n", "").replace("\r", "")[:120])
-            
+
 
         offset += len(match)
 
