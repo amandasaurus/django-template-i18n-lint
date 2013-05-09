@@ -6,6 +6,8 @@ Prints out all
 import re
 import sys
 from optparse import OptionParser
+from django.core.management.base import BaseCommand, CommandError
+from optparse import make_option
 
 
 def location(str, pos):
@@ -136,14 +138,24 @@ def print_strings(filename):
     for lineno, charpos, message in non_translated_text(filename):
         print "%s:%s:%s:%s" % (filename, lineno, charpos, message)
 
-if __name__ == '__main__':
-    parser = OptionParser(usage="usage: %prog [options] <filename>")
-    parser.add_option("-r", "--replace", action="store_true", dest="replace",
-            help="Ask to replace the strings in the file.", default=False)
-    (options, args) = parser.parse_args()
-    if len(args) != 1:
-        parser.error("incorrect number of arguments")
-    if options.replace:
-        replace_strings(args[0])
-    else:
-        print_strings(args[0])
+
+class Command(BaseCommand):
+    args = '<filename>'
+    help = 'A simple script to find non-i18n text in a Django template'
+    option_list = BaseCommand.option_list + (
+        make_option(
+            "-r",
+            "--replace",
+            action="store_true",
+            dest="replace",
+            help="Ask to replace the strings in the file.",
+            default=False)
+        )
+
+    def handle(self, *args, **options):
+        if len(args) != 1:
+            raise CommandError("incorrect number of arguments")
+        if options['replace']:
+            replace_strings(args[0])
+        else:
+            print_strings(args[0])
