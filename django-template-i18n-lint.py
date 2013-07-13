@@ -3,6 +3,7 @@
 Prints out all
 """
 
+import os
 import re
 import sys
 from optparse import OptionParser
@@ -137,13 +138,26 @@ def print_strings(filename):
         print "%s:%s:%s:%s" % (filename, lineno, charpos, message)
 
 if __name__ == '__main__':
-    parser = OptionParser(usage="usage: %prog [options] <filename>")
+    parser = OptionParser(usage="usage: %prog [options] <filenames>")
     parser.add_option("-r", "--replace", action="store_true", dest="replace",
             help="Ask to replace the strings in the file.", default=False)
     (options, args) = parser.parse_args()
-    if len(args) != 1:
-        parser.error("incorrect number of arguments")
-    if options.replace:
-        replace_strings(args[0])
-    else:
-        print_strings(args[0])
+
+    # Create a list of files to check
+    if len(args) == 0:
+        args = [os.getcwd()]
+    files = []
+    for arg in args:
+        if os.path.isdir(arg):
+            for dirpath, dirs, filenames in os.walk(arg):
+                files.extend(os.path.join(dirpath, fname)
+                             for fname in filenames
+                             if fname.endswith('.html') or fname.endswith('.txt'))
+        else:
+            files.append(arg)
+
+    for filename in files:
+        if options.replace:
+            replace_strings(filename)
+        else:
+            print_strings(filename)
