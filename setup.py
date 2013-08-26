@@ -7,7 +7,7 @@ setup(
     description="Django management command to find untranslated strings in templates.",
     version='0.2',
     author="Justin Hamade",
-    author_email='test',
+    author_email='justhamade@gmail.com',
     url="http://github.com/justhamade/django-template-i18n-lint",
     download_url="http://github.com/justhamade/django-template-i18n-lint",
     platforms=['any', ],
