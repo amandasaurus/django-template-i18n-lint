@@ -144,8 +144,8 @@ class Command(BaseCommand):
     args = '<filename>'
     help = 'A simple script to find non-i18n text in a Django template'
     option_list = BaseCommand.option_list + (
-        make_option('-e', '--exclude', dest='exclude',action='append', default=[],
-            help='App to exclude (use multiple --exclude to exclude multiple apps).'),
+        make_option('-e', '--exclude', dest='exclude', action='append', default=[],
+                    help='App to exclude (use multiple --exclude to exclude multiple apps).'),
         make_option(
             "-r",
             "--replace",
@@ -162,7 +162,7 @@ class Command(BaseCommand):
         #    replace_strings(args[0])
         #else:
         #    print_strings(args[0])
-        exclude = options.get('exclude',[])
+        exclude = options.get('exclude', [])
 
         apps = self._get_apps(app_labels, exclude)
 
@@ -210,7 +210,7 @@ class Command(BaseCommand):
         for dirpath, dirnames, filenames in os.walk(location):
             for filename in filenames:
                 file_name = os.path.join(dirpath, filename) \
-                                   .replace(location, '') \
-                                   .strip('/\\')
+                    .replace(location, '') \
+                    .strip('/\\')
                 files.append(file_name)
         return files
