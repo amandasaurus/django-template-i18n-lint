@@ -1,29 +1,15 @@
-#! /usr/bin/python
 """
 Prints out all
 """
 
 import re
-from django.core.management.base import BaseCommand, CommandError
+import sys
 from optparse import make_option
+import os.path
 
+from django.core.management.base import BaseCommand, CommandError
+from django.utils.importlib import import_module
 
-def location(str, pos):
-    """Given a string str and an integer pos, find the line number and character in that line that correspond to pos"""
-    lineno, charpos = 1, 1
-    counter = 0
-    for char in str:
-        if counter == pos:
-            return lineno, charpos
-        elif char == '\n':
-            lineno += 1
-            charpos = 1
-            counter += 1
-        else:
-            charpos += 1
-            counter += 1
-
-    return lineno, charpos
 
 # Things that are OK:
 GOOD_STRINGS = re.compile(
@@ -91,10 +77,28 @@ GOOD_STRINGS = re.compile(
         )""",
 
     # MULTILINE to match across lines and DOTALL to make . include the newline
-    re.MULTILINE|re.DOTALL|re.VERBOSE)
+    re.MULTILINE | re.DOTALL | re.VERBOSE)
 
 # Stops us matching non-letter parts, e.g. just hypens, full stops etc.
 LETTERS = re.compile("\w")
+
+
+def location(str, pos):
+    """Given a string str and an integer pos, find the line number and character in that line that correspond to pos"""
+    lineno, charpos = 1, 1
+    counter = 0
+    for char in str:
+        if counter == pos:
+            return lineno, charpos
+        elif char == '\n':
+            lineno += 1
+            charpos = 1
+            counter += 1
+        else:
+            charpos += 1
+            counter += 1
+
+    return lineno, charpos
 
 
 def replace_strings(filename):
@@ -115,7 +119,6 @@ def replace_strings(filename):
 
 
 def non_translated_text(filename):
-
     template = open(filename).read()
     offset = 0
 
@@ -132,28 +135,82 @@ def non_translated_text(filename):
         offset += len(match)
 
 
-def print_strings(filename):
+def print_strings(filename, stdout=sys.stdout):
     for lineno, charpos, message in non_translated_text(filename):
-        print "%s:%s:%s:%s" % (filename, lineno, charpos, message)
+        stdout.write("%s:%s:%s:%s" % (filename, lineno, charpos, message))
 
 
 class Command(BaseCommand):
     args = '<filename>'
     help = 'A simple script to find non-i18n text in a Django template'
     option_list = BaseCommand.option_list + (
+        make_option('-e', '--exclude', dest='exclude',action='append', default=[],
+            help='App to exclude (use multiple --exclude to exclude multiple apps).'),
         make_option(
             "-r",
             "--replace",
             action="store_true",
             dest="replace",
             help="Ask to replace the strings in the file.",
-            default=False)
-        )
+            default=False),
+    )
 
-    def handle(self, *args, **options):
-        if len(args) != 1:
-            raise CommandError("incorrect number of arguments")
-        if options['replace']:
-            replace_strings(args[0])
+    def handle(self, *app_labels, **options):
+        #if len(args) != 1:
+        #    raise CommandError("Please specify a template file.")
+        #if options['replace']:
+        #    replace_strings(args[0])
+        #else:
+        #    print_strings(args[0])
+        exclude = options.get('exclude',[])
+
+        apps = self._get_apps(app_labels, exclude)
+
+        templates_dirs = []
+
+        for app in apps:
+            module = import_module(app)
+            module_dir = os.path.dirname(module.__file__)
+            templates_dirs.append(os.path.join(module_dir, 'templates'))
+
+        for templates_dir in templates_dirs:
+            templates = self._find_files(templates_dir)
+
+            #print templates_dir, ':'
+
+            for template_name in templates:
+                #print '    ', template_name
+                print_strings(os.path.join(templates_dir, template_name), self.stdout)
+
+
+    def _get_apps(self, app_labels, exclude=[]):
+        from django.conf import settings
+
+        apps = dict([(app.split('.')[-1], app) for app in settings.INSTALLED_APPS])
+
+        try:
+            [apps.pop(app_label) for app_label in exclude]
+        except KeyError, key:
+            raise CommandError("Unknown application: %s in excluded apps" % key)
+
+        if len(app_labels) > 0:
+            try:
+                apps = [apps.pop(app_label) for app_label in app_labels]
+            except KeyError, key:
+                raise CommandError("Unknown application: %s" % key)
         else:
-            print_strings(args[0])
+            apps = apps.values()
+
+        return apps
+
+    def _find_files(self, location):
+        """Recursively finds files at location. Returns list of relative to
+        filename files"""
+        files = []
+        for dirpath, dirnames, filenames in os.walk(location):
+            for filename in filenames:
+                file_name = os.path.join(dirpath, filename) \
+                                   .replace(location, '') \
+                                   .strip('/\\')
+                files.append(file_name)
+        return files
