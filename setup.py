@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
 
-try:
-    # Prefer setuptools generally
-    from setuptools import setup
-except:
-    from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
     name="django-template-i18n-lint",
     description="Django management command to find untranslated strings in templates.",
-    version='0.1',
+    version='0.2',
     author="Justin Hamade",
+    author_email='test',
     url="http://github.com/justhamade/django-template-i18n-lint",
     download_url="http://github.com/justhamade/django-template-i18n-lint",
-    platforms=['any',],
+    platforms=['any', ],
     requires=[],
-    packages=['i18n-lint',],
+    install_requires=['Django'],
+    packages=find_packages(),
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
