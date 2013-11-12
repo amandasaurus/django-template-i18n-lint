@@ -58,6 +58,13 @@ GOOD_STRINGS = re.compile(
 
          # Any html attribute that's not value or title
         |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)="[^"]*?"
+        
+        # Any html attribute that's not value or title
+        |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=[^\W]*?[(\w|>)]
+        
+        |SELECTED
+        
+        |CHECKED
 
          # HTML opening tag
         |<[\w:]+
@@ -71,6 +78,9 @@ GOOD_STRINGS = re.compile(
 
          # any django template variable
         |{{.*?}}
+        
+         # any django template tag
+        |{%.*?%}
 
          # HTML doctype
         |<!DOCTYPE.*?>
@@ -83,6 +93,9 @@ GOOD_STRINGS = re.compile(
 
          # HTML entities
         |&[a-z]{1,10};
+        
+        # HTML entities
+        |&\#x[0-9]{1,10};
 
          # CSS style
         |<style.*?</style>
@@ -92,7 +105,7 @@ GOOD_STRINGS = re.compile(
         )""",
 
     # MULTILINE to match across lines and DOTALL to make . include the newline
-    re.MULTILINE|re.DOTALL|re.VERBOSE)
+    re.MULTILINE|re.DOTALL|re.VERBOSE|re.IGNORECASE)
 
 # Stops us matching non-letter parts, e.g. just hypens, full stops etc.
 LETTERS = re.compile("\w")
@@ -110,7 +123,10 @@ def replace_strings(filename):
         full_text_lines.append(message)
 
     full_text = "".join(full_text_lines)
-    save_filename = filename.split(".")[0] + "_translated.html"
+    if options.overwrite:
+        save_filename = filename
+    else:
+        save_filename = filename.split(".")[0] + "_translated.html"
     open(save_filename, 'w').write(full_text)
     print "Fully translated! Saved as: %s" % save_filename
 
@@ -140,7 +156,11 @@ def print_strings(filename):
 if __name__ == '__main__':
     parser = OptionParser(usage="usage: %prog [options] <filenames>")
     parser.add_option("-r", "--replace", action="store_true", dest="replace",
-            help="Ask to replace the strings in the file.", default=False)
+                      help="Ask to replace the strings in the file.", default=False)
+    parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite",
+                      help="When replacing the strings, overwrite the original file.  If not specified, the file will be saved in a seperate file named X_translated.html", default=False)
+    parser.add_option("-e", "--exclude", action="append", dest="exclude_filename",
+                      help="Exclude these filenames from being linted")
     (options, args) = parser.parse_args()
 
     # Create a list of files to check
@@ -152,7 +172,7 @@ if __name__ == '__main__':
             for dirpath, dirs, filenames in os.walk(arg):
                 files.extend(os.path.join(dirpath, fname)
                              for fname in filenames
-                             if fname.endswith('.html') or fname.endswith('.txt'))
+                             if (fname.endswith('.html') or fname.endswith('.txt')) and fname not in options.exclude_filename)
         else:
             files.append(arg)
 
