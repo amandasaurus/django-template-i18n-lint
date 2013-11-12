@@ -160,7 +160,7 @@ if __name__ == '__main__':
     parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite",
                       help="When replacing the strings, overwrite the original file.  If not specified, the file will be saved in a seperate file named X_translated.html", default=False)
     parser.add_option("-e", "--exclude", action="append", dest="exclude_filename",
-                      help="Exclude these filenames from being linted")
+                      help="Exclude these filenames from being linted", default=[])
     (options, args) = parser.parse_args()
 
     # Create a list of files to check
