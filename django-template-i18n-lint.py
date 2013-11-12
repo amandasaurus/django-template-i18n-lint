@@ -58,6 +58,11 @@ GOOD_STRINGS = re.compile(
 
          # Any html attribute that's not value or title
         |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)="[^"]*?"
+        
+        # Any html attribute that's not value or title
+        |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=[^\W]*?[(\w|>)]
+        
+        |[(SELECTED|CHECKED)]
 
          # HTML opening tag
         |<[\w:]+
@@ -71,6 +76,9 @@ GOOD_STRINGS = re.compile(
 
          # any django template variable
         |{{.*?}}
+        
+         # any django template tag
+        |{%.*?%}
 
          # HTML doctype
         |<!DOCTYPE.*?>
@@ -83,6 +91,9 @@ GOOD_STRINGS = re.compile(
 
          # HTML entities
         |&[a-z]{1,10};
+        
+        # HTML entities
+        |&\#x[0-9]{1,10};
 
          # CSS style
         |<style.*?</style>
@@ -140,7 +151,9 @@ def print_strings(filename):
 if __name__ == '__main__':
     parser = OptionParser(usage="usage: %prog [options] <filenames>")
     parser.add_option("-r", "--replace", action="store_true", dest="replace",
-            help="Ask to replace the strings in the file.", default=False)
+                      help="Ask to replace the strings in the file.", default=False)
+    parser.add_option("-e", "--exclude", action="append", dest="exclude_filename",
+                      help="Exclude these filenames from being linted")
     (options, args) = parser.parse_args()
 
     # Create a list of files to check
@@ -152,7 +165,7 @@ if __name__ == '__main__':
             for dirpath, dirs, filenames in os.walk(arg):
                 files.extend(os.path.join(dirpath, fname)
                              for fname in filenames
-                             if fname.endswith('.html') or fname.endswith('.txt'))
+                             if (fname.endswith('.html') or fname.endswith('.txt')) and fname not in options.exclude_filename)
         else:
             files.append(arg)
 
