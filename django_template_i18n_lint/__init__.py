@@ -105,7 +105,7 @@ GOOD_STRINGS = re.compile(
         )""",
 
     # MULTILINE to match across lines and DOTALL to make . include the newline
-    re.MULTILINE|re.DOTALL|re.VERBOSE|re.IGNORECASE)
+    re.MULTILINE | re.DOTALL | re.VERBOSE | re.IGNORECASE)
 
 # Stops us matching non-letter parts, e.g. just hypens, full stops etc.
 LETTERS = re.compile("\w")
@@ -154,6 +154,7 @@ def print_strings(filename):
 
     for lineno, charpos, message in non_translated_text(file_contents):
         print "%s:%s:%s:%s" % (filename, lineno, charpos, message)
+
 
 def main():
     parser = OptionParser(usage="usage: %prog [options] <filenames>")
