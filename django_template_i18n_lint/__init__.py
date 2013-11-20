@@ -58,12 +58,12 @@ GOOD_STRINGS = re.compile(
 
          # Any html attribute that's not value or title
         |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)="[^"]*?"
-        
+
         # Any html attribute that's not value or title
         |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=[^\W]*?[(\w|>)]
-        
+
         |SELECTED
-        
+
         |CHECKED
 
          # HTML opening tag
@@ -78,7 +78,7 @@ GOOD_STRINGS = re.compile(
 
          # any django template variable
         |{{.*?}}
-        
+
          # any django template tag
         |{%.*?%}
 
@@ -93,7 +93,7 @@ GOOD_STRINGS = re.compile(
 
          # HTML entities
         |&[a-z]{1,10};
-        
+
         # HTML entities
         |&\#x[0-9]{1,10};
 
