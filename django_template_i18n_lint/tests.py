@@ -10,6 +10,8 @@ class DjangoTemplateI18nLintTestCase(unittest.TestCase):
         return test
 
     testSimple = _known_good_output("<h1>Foo</h1>", [(1, 5, 'Foo')])
+    testMultiWord = _known_good_output("<h1>Foo</h1><p>Bar</p>", [(1, 5, 'Foo'), (1, 16, 'Bar')])
+    testMultiWordMultiLine = _known_good_output("<h1>Foo</h1>\n<p>Bar</p>", [(1, 5, 'Foo'), (2, 4, 'Bar')])
 
 
 if __name__ == '__main__':
