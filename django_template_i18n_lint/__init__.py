@@ -153,7 +153,7 @@ def print_strings(filename):
     for lineno, charpos, message in non_translated_text(filename):
         print "%s:%s:%s:%s" % (filename, lineno, charpos, message)
 
-if __name__ == '__main__':
+def main():
     parser = OptionParser(usage="usage: %prog [options] <filenames>")
     parser.add_option("-r", "--replace", action="store_true", dest="replace",
                       help="Ask to replace the strings in the file.", default=False)
@@ -181,3 +181,6 @@ if __name__ == '__main__':
             replace_strings(filename)
         else:
             print_strings(filename)
+
+if __name__ == '__main__':
+    main()
