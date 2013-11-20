@@ -131,9 +131,8 @@ def replace_strings(filename):
     print "Fully translated! Saved as: %s" % save_filename
 
 
-def non_translated_text(filename):
+def non_translated_text(template):
 
-    template = open(filename).read()
     offset = 0
 
     # Find the parts of the template that don't match this regex
@@ -150,7 +149,10 @@ def non_translated_text(filename):
 
 
 def print_strings(filename):
-    for lineno, charpos, message in non_translated_text(filename):
+    with open(filename) as fp:
+        file_contents = fp.read()
+
+    for lineno, charpos, message in non_translated_text(file_contents):
         print "%s:%s:%s:%s" % (filename, lineno, charpos, message)
 
 def main():
