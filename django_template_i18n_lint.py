@@ -62,9 +62,8 @@ GOOD_STRINGS = re.compile(
         # Any html attribute that's not value or title
         |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=[^\W]*?[(\w|>)]
 
-        |SELECTED
-
-        |CHECKED
+         # Boolean attributes
+        |<[^<>]+?(?:checked|selected|disabled|readonly|multiple|ismap|defer|declare|noresize|nowrap|noshade|compact)[^<>]*?>
 
          # HTML opening tag
         |<[\w:]+
