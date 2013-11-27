@@ -2,12 +2,24 @@
 
 from setuptools import setup
 
-setup(name="django-template-i18n-lint",
-      version="0.1.0",
-      author="Rory McCann",
-      author_email="rory@technomancy.org",
-      py_modules=['django_template_i18n_lint'],
-      license='GPLv3',
-      description='',
-      test_suite='tests',
-      )
+setup(
+    name="django-template-i18n-lint",
+    version="0.1.0",
+    author="Rory McCann",
+    author_email="rory@technomancy.org",
+    py_modules=['django_template_i18n_lint'],
+    license='GPLv3+',
+    url='http://www.technomancy.org/python/django-template-i18n-lint/',
+    description='',
+    test_suite='tests',
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        'License :: OSI Approved :: BSD License',
+        'Environment :: Console',
+        'Framework :: Django',
+        'Intended Audience :: Developers',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2.7',
+    ],
+)
