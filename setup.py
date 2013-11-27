@@ -22,4 +22,9 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
     ],
+    entry_points={
+        'console_scripts': [
+            'django-template-i18n-lint = django_template_i18n_lint:main',
+        ]
+    },
 )
