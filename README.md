@@ -1,6 +1,10 @@
 Django Template i18n lint
 =========================
 
+[![Build Status](https://travis-ci.org/rory/django-template-i18n-lint.png?branch=master)](https://travis-ci.org/rory/django-template-i18n-lint)
+[![Coverage Status](https://coveralls.io/repos/rory/django-template-i18n-lint/badge.png?branch=master)](https://coveralls.io/r/rory/django-template-i18n-lint?branch=master)
+
+
 A simple script to find non-i18n text in a Django template.
 
 It can also automatically wrap the strings in `{% trans "" %}` tags, by running it with the `-r` command-line flag.
