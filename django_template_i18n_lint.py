@@ -116,7 +116,7 @@ def replace_strings(filename):
         if index % 2 == 0 and re.search("\w", message):
             before, message, after = re.match("^(\s*)(.*?)(\s*)$", message, re.DOTALL).groups()
             message = message.strip().replace("\n", "").replace("\r", "")
-            change = raw_input("Make '%s' translatable? [Y/n] " % message)
+            change = input("Make '%s' translatable? [Y/n] " % message)
             if change == 'y' or change == "":
                 message = '%s{%% trans "%s" %%}%s' % (before, message, after)
         full_text_lines.append(message)
@@ -127,7 +127,7 @@ def replace_strings(filename):
     else:
         save_filename = filename.split(".")[0] + "_translated.html"
     open(save_filename, 'w').write(full_text)
-    print "Fully translated! Saved as: %s" % save_filename
+    print("Fully translated! Saved as: %s" % save_filename)
 
 
 def non_translated_text(template):
@@ -152,7 +152,7 @@ def print_strings(filename):
         file_contents = fp.read()
 
     for lineno, charpos, message in non_translated_text(file_contents):
-        print "%s:%s:%s:%s" % (filename, lineno, charpos, message)
+        print("%s:%s:%s:%s" % (filename, lineno, charpos, message))
 
 
 def main():
