@@ -155,6 +155,16 @@ def print_strings(filename):
         print("%s:%s:%s:%s" % (filename, lineno, charpos, message))
 
 
+def filenames_to_work_on(directory, exclude_filenames):
+    """Return list of files in directory that we should look at"""
+    files = []
+    for dirpath, dirs, filenames in os.walk(directory):
+        files.extend(os.path.join(dirpath, fname)
+                        for fname in filenames
+                        if (fname.endswith('.html') or fname.endswith('.txt')) and fname not in exclude_filenames)
+    return files
+
+
 def main():
     parser = OptionParser(usage="usage: %prog [options] <filenames>")
     parser.add_option("-r", "--replace", action="store_true", dest="replace",
@@ -171,10 +181,7 @@ def main():
     files = []
     for arg in args:
         if os.path.isdir(arg):
-            for dirpath, dirs, filenames in os.walk(arg):
-                files.extend(os.path.join(dirpath, fname)
-                             for fname in filenames
-                             if (fname.endswith('.html') or fname.endswith('.txt')) and fname not in options.exclude_filename)
+            files = filenames_to_work_on(arg, options.exclude_filename)
         else:
             files.append(arg)
 
