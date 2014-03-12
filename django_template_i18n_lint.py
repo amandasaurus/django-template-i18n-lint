@@ -110,13 +110,13 @@ GOOD_STRINGS = re.compile(
 LETTERS = re.compile("\w")
 
 
-def replace_strings(filename):
+def replace_strings(filename, options):
     full_text_lines = []
     for index, message in enumerate(GOOD_STRINGS.split(open(filename).read())):
         if index % 2 == 0 and re.search("\w", message):
             before, message, after = re.match("^(\s*)(.*?)(\s*)$", message, re.DOTALL).groups()
             message = message.strip().replace("\n", "").replace("\r", "")
-            change = input("Make '%s' translatable? [Y/n] " % message)
+            change = raw_input("[%s]Make '%s' translatable? [Y/n] " % (filename, message))
             if change == 'y' or change == "":
                 message = '%s{%% trans "%s" %%}%s' % (before, message, after)
         full_text_lines.append(message)
@@ -180,7 +180,7 @@ def main():
 
     for filename in files:
         if options.replace:
-            replace_strings(filename)
+            replace_strings(filename, options=options)
         else:
             print_strings(filename)
 
