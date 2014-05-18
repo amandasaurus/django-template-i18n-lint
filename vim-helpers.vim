@@ -1,5 +1,5 @@
 " Enter :make to get a list of the messages
-set makeprg=django-template-i18n-lint.py
+set makeprg=django_template_i18n_lint.py
 set errorformat=%f:%l:%c:%m
 
 " Press <F8> to easily get to the next un-translated string
