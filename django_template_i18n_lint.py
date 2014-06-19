@@ -110,7 +110,7 @@ GOOD_STRINGS = re.compile(
 LETTERS = re.compile("\w")
 
 
-def replace_strings(filename):
+def replace_strings(filename, overwrite=False):
     full_text_lines = []
     for index, message in enumerate(GOOD_STRINGS.split(open(filename).read())):
         if index % 2 == 0 and re.search("\w", message):
@@ -122,7 +122,7 @@ def replace_strings(filename):
         full_text_lines.append(message)
 
     full_text = "".join(full_text_lines)
-    if options.overwrite:
+    if overwrite:
         save_filename = filename
     else:
         save_filename = filename.split(".")[0] + "_translated.html"
@@ -187,7 +187,7 @@ def main():
 
     for filename in files:
         if options.replace:
-            replace_strings(filename)
+            replace_strings(filename, overwrite=True)
         else:
             print_strings(filename)
 
