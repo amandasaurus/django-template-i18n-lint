@@ -116,7 +116,7 @@ def replace_strings(filename):
         if index % 2 == 0 and re.search("\w", message):
             before, message, after = re.match("^(\s*)(.*?)(\s*)$", message, re.DOTALL).groups()
             message = message.strip().replace("\n", "").replace("\r", "")
-            change = input("Make '%s' translatable? [Y/n] " % message)
+            change = raw_input("Make '%s' translatable? [Y/n] " % message)
             if change == 'y' or change == "":
                 message = '%s{%% trans "%s" %%}%s' % (before, message, after)
         full_text_lines.append(message)
