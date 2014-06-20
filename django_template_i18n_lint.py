@@ -109,17 +109,56 @@ GOOD_STRINGS = re.compile(
 # Stops us matching non-letter parts, e.g. just hypens, full stops etc.
 LETTERS = re.compile("\w")
 
+LEADING_TRAILING_WHITESPACE = re.compile("(^\W+|\W+$)")
+
+def split_into_good_and_bad(template):
+    for index, match in enumerate(GOOD_STRINGS.split(template)):
+        yield (index, match)
+
+
+
+def split_trailing_space(string):
+    """Given a string, returns a tuple of 3 string, the leading whitespace, middle, and trailing whitespace"""
+    results = LEADING_TRAILING_WHITESPACE.split(string)
+    if len(results) == 1:
+        # no spaces
+        return ('', string, '')
+    elif len(results) == 3 and results[0] == '' and results[2] != '':
+        # only leading whitespace
+        return (result[1], results[2], '')
+    elif len(results) == 3 and results[0] != '' and results[2] == '':
+        # only trailing
+        return ('', results[0], results[1])
+    elif len(results) == 5:
+        # leading and trailing whitespace
+        return (results[1], results[2], results[3])
+    else:
+        raise NotImplementedError("Unknown case: %r %r" % (string, results))
+
+
 
 def replace_strings(filename, overwrite=False):
     full_text_lines = []
-    for index, message in enumerate(GOOD_STRINGS.split(open(filename).read())):
-        if index % 2 == 0 and re.search("\w", message):
-            before, message, after = re.match("^(\s*)(.*?)(\s*)$", message, re.DOTALL).groups()
-            message = message.strip().replace("\n", "").replace("\r", "")
-            change = raw_input("Make '%s' translatable? [Y/n] " % message)
-            if change == 'y' or change == "":
-                message = '%s{%% trans "%s" %%}%s' % (before, message, after)
-        full_text_lines.append(message)
+    with open(filename) as fp:
+        content = fp.read()
+
+    for index, string in split_into_good_and_bad(content):
+        if index % 2 == 1:
+            full_text_lines.append(string)
+        elif index % 2 == 0:
+            # Ignore it if it doesn't have letters
+            if not LETTERS.search(string):
+                full_text_lines.append(string)
+            else:
+                # split out the leading whitespace and trailing
+                leading_whitespace, message, trailing_whitespace = split_trailing_space(string)
+                change = raw_input("Make %r translatable? [Y/n] " % message)
+                full_text_lines.append(leading_whitespace)
+                if change == 'y' or change == "":
+                    full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
+                else:
+                    full_text_lines.append(message)
+                full_text_lines.append(trailing_whitespace)
 
     full_text = "".join(full_text_lines)
     if overwrite:
@@ -136,7 +175,7 @@ def non_translated_text(template):
 
     # Find the parts of the template that don't match this regex
     # taken from http://www.technomancy.org/python/strings-that-dont-match-regex/
-    for index, match in enumerate(GOOD_STRINGS.split(template)):
+    for index, match in split_into_good_and_bad(template):
         if index % 2 == 0:
 
             # Ignore it if it doesn't have letters
