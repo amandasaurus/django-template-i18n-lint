@@ -10,7 +10,7 @@ setup(
     py_modules=['django_template_i18n_lint'],
     license='GPLv3+',
     url='http://www.technomancy.org/python/django-template-i18n-lint/',
-    description='',
+    description='Lint tool to find non-trans/blocktrans text in django templates',
     test_suite='tests',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
