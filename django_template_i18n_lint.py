@@ -125,7 +125,7 @@ def split_trailing_space(string):
         return ('', string, '')
     elif len(results) == 3 and results[0] == '' and results[2] != '':
         # only leading whitespace
-        return (result[1], results[2], '')
+        return (results[1], results[2], '')
     elif len(results) == 3 and results[0] != '' and results[2] == '':
         # only trailing
         return ('', results[0], results[1])
