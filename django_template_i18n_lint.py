@@ -53,6 +53,10 @@ GOOD_STRINGS = re.compile(
          # An <option> value tag
         |<option[^<>]+?value="[^"]*?"
 
+         # Any html attribute that's not value or title with django templatetag inside
+        |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)="{%.*?%}"
+        |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)='{%.*?%}'
+
          # Any html attribute that's not value or title
         |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)='[^']*?'
 
@@ -80,6 +84,9 @@ GOOD_STRINGS = re.compile(
 
          # any django template tag
         |{%.*?%}
+
+         # any angular.js template
+        |\[\[.*?\]\]
 
          # HTML doctype
         |<!DOCTYPE.*?>
