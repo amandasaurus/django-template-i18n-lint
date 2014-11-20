@@ -137,7 +137,7 @@ def split_trailing_space(string):
 
 
 
-def replace_strings(filename, overwrite=False):
+def replace_strings(filename, overwrite=False, force=False):
     full_text_lines = []
     with open(filename) as fp:
         content = fp.read()
@@ -152,12 +152,18 @@ def replace_strings(filename, overwrite=False):
             else:
                 # split out the leading whitespace and trailing
                 leading_whitespace, message, trailing_whitespace = split_trailing_space(string)
-                change = raw_input("Make %r translatable? [Y/n] " % message)
                 full_text_lines.append(leading_whitespace)
-                if change == 'y' or change == "":
+                
+                if force:
                     full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
+                    
                 else:
-                    full_text_lines.append(message)
+                    change = raw_input("Make %r translatable? [Y/n] " % message)                
+                    if change == 'y' or change == "":
+                        full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
+                    else:
+                        full_text_lines.append(message)
+                        
                 full_text_lines.append(trailing_whitespace)
 
     full_text = "".join(full_text_lines)
@@ -210,6 +216,8 @@ def main():
                       help="Ask to replace the strings in the file.", default=False)
     parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite",
                       help="When replacing the strings, overwrite the original file.  If not specified, the file will be saved in a seperate file named X_translated.html", default=False)
+    parser.add_option("-f", "--force", action="store_true", dest="force",
+                      help="Force to replace string with no questions", default=False)
     parser.add_option("-e", "--exclude", action="append", dest="exclude_filename",
                       help="Exclude these filenames from being linted", default=[])
     (options, args) = parser.parse_args()
@@ -226,7 +234,7 @@ def main():
 
     for filename in files:
         if options.replace:
-            replace_strings(filename, overwrite=True)
+            replace_strings(filename, overwrite=True, force=options.force)
         else:
             print_strings(filename)
 
