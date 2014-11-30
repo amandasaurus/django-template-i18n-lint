@@ -40,6 +40,7 @@ class DjangoTemplateI18nLintTestCase(unittest.TestCase):
     testNoHTMLAttrNoQuote2 = _known_good_output("<form method=post>FOO</form>", [(1, 19, 'FOO')])
     
     testIssue17a = _known_good_output("<input type=\"submit\" value=\"Confirm\" class=\"btn btn-danger\" />", [(1, 29, 'Confirm')])
+    testIssue17b = _known_good_output('<li><a href="https://twitter.com/localunews" class="icon-twitter" rel="tooltip" title="" data-placement="top" data-original-title="Twitter"><i class="fa fa-twitter"></i></a></li>', [(1, 132, 'Twitter')])
 
 
 if __name__ == '__main__':

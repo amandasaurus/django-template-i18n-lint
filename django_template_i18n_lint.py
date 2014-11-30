@@ -58,7 +58,8 @@ GOOD_STRINGS = re.compile(
         |(?:['"]\W+)?[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=(?:'[^']*?'|"[^"]*?"|[a-zA-Z]+)
 
          # The actual alt/value/title tag itself cannot be translated, but the value should be
-        |(?:alt|value|title|summary)=['"]?
+         # Treat data-title/data-original-title etc as equivalanets. Think this is some bootstrap thing & HTML5
+        |(?:['"]\W+)?(?:data-|data-original-)?(?:alt|value|title|summary)=['"]?
 
          # Boolean attributes
         |<[^<>]+?(?:checked|selected|disabled|readonly|multiple|ismap|defer|async|declare|noresize|nowrap|noshade|compact|hidden|itemscope|autofocus|autoplay|controls|download)[^<>]*?>
@@ -67,7 +68,8 @@ GOOD_STRINGS = re.compile(
         |<[\w:]+
 
          # End of a html opening tag
-        |/?>
+         # NB: catching end of quote from last attribute
+        |(?:['"]\W*)?/?>
 
          # closing html tag
         |</.*?>
