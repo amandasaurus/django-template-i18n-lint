@@ -36,8 +36,8 @@ class DjangoTemplateI18nLintTestCase(unittest.TestCase):
 
     testNoHTMLAttrSingleQuote = _known_good_output("<form method='POST'>FOO</form>", [(1, 21, 'FOO')])
     testNoHTMLAttrDoubleQuote = _known_good_output("<form method=\"POST\">FOO</form>", [(1, 21, 'FOO')])
-    testNoHTMLAttrNoQuote = _known_good_output("<form method=POST>FOO</form>", [(1, 19, 'FOO')])
-    testNoHTMLAttrNoQuote = _known_good_output("<form method=post>FOO</form>", [(1, 19, 'FOO')])
+    testNoHTMLAttrNoQuote1 = _known_good_output("<form method=POST>FOO</form>", [(1, 19, 'FOO')])
+    testNoHTMLAttrNoQuote2 = _known_good_output("<form method=post>FOO</form>", [(1, 19, 'FOO')])
 
 
 if __name__ == '__main__':
