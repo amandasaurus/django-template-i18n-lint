@@ -34,6 +34,11 @@ class DjangoTemplateI18nLintTestCase(unittest.TestCase):
     testBooleanValuesOK1 = _known_good_output("<option selected>Option</option>",[(1, 18, 'Option')])
     testBooleanValuesOK2 = _known_good_output("<img src='my.jpg' ismap />",[])
 
+    testNoHTMLAttrSingleQuote = _known_good_output("<form method='POST'>FOO</form>", [(1, 21, 'FOO')])
+    testNoHTMLAttrDoubleQuote = _known_good_output("<form method=\"POST\">FOO</form>", [(1, 21, 'FOO')])
+    testNoHTMLAttrNoQuote = _known_good_output("<form method=POST>FOO</form>", [(1, 19, 'FOO')])
+    testNoHTMLAttrNoQuote = _known_good_output("<form method=post>FOO</form>", [(1, 19, 'FOO')])
+
 
 if __name__ == '__main__':
     unittest.main()

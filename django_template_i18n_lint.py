@@ -53,11 +53,14 @@ GOOD_STRINGS = re.compile(
          # An <option> value tag
         |<option[^<>]+?value="[^"]*?"
 
-         # Any html attribute that's not value or title
+         # Any html attribute that's not value or title (single quote)
         |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)='[^']*?'
 
-         # Any html attribute that's not value or title
+         # Any html attribute that's not value or title (double quote)
         |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)="[^"]*?"
+
+         # Any html attribute that's not value or title (no quotes, html5)
+        |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=[a-zA-Z]+?"
 
         # Any html attribute that's not value or title
         |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=[^\W]*?[(\w|>)]
