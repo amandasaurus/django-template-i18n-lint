@@ -57,9 +57,6 @@ GOOD_STRINGS = re.compile(
          # NB at the start we want to grab any trailing quote from the previous attribute
         |(?:['"]\W+)?[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=(?:'[^']*?'|"[^"]*?"|[a-zA-Z]+)
 
-        # Any html attribute that's not value or title
-    #|[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=[^\W]*?[(\w|>)]
-
          # The actual alt/value/title tag itself cannot be translated, but the value should be
         |(?:alt|value|title|summary)=['"]?
 
