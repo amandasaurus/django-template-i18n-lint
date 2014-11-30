@@ -53,18 +53,15 @@ GOOD_STRINGS = re.compile(
          # An <option> value tag
         |<option[^<>]+?value="[^"]*?"
 
-         # Any html attribute that's not value or title (single quote)
-        |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)='[^']*?'
-
-         # Any html attribute that's not value or title (double quote)
-        |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)="[^"]*?"
-
-         # Any html attribute that's not value or title (no quotes, html5)
-         # NB greedy matching because we need to go to the end of that attr value
-        |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=[a-zA-Z]+
+         # Any html attribute that's not value or title (single quote, double quote and html5 quoteless)
+         # NB at the start we want to grab any trailing quote from the previous attribute
+        |(?:['"]\W+)?[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=(?:'[^']*?'|"[^"]*?"|[a-zA-Z]+)
 
         # Any html attribute that's not value or title
-        |[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=[^\W]*?[(\w|>)]
+    #|[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=[^\W]*?[(\w|>)]
+
+         # The actual alt/value/title tag itself cannot be translated, but the value should be
+        |(?:alt|value|title|summary)=['"]?
 
          # Boolean attributes
         |<[^<>]+?(?:checked|selected|disabled|readonly|multiple|ismap|defer|async|declare|noresize|nowrap|noshade|compact|hidden|itemscope|autofocus|autoplay|controls|download)[^<>]*?>
@@ -73,8 +70,7 @@ GOOD_STRINGS = re.compile(
         |<[\w:]+
 
          # End of a html opening tag
-        |>
-        |/>
+        |/?>
 
          # closing html tag
         |</.*?>

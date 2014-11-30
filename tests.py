@@ -38,6 +38,8 @@ class DjangoTemplateI18nLintTestCase(unittest.TestCase):
     testNoHTMLAttrDoubleQuote = _known_good_output("<form method=\"POST\">FOO</form>", [(1, 21, 'FOO')])
     testNoHTMLAttrNoQuote1 = _known_good_output("<form method=POST>FOO</form>", [(1, 19, 'FOO')])
     testNoHTMLAttrNoQuote2 = _known_good_output("<form method=post>FOO</form>", [(1, 19, 'FOO')])
+    
+    testIssue17a = _known_good_output("<input type=\"submit\" value=\"Confirm\" class=\"btn btn-danger\" />", [(1, 29, 'Confirm')])
 
 
 if __name__ == '__main__':
