@@ -141,19 +141,28 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
     with open(filename) as fp:
         content = fp.read()
 
+    offset = 0
+    ignore_lines = find_ignored_lines(content)
+
     for index, string in split_into_good_and_bad(content):
         if index % 2 == 1:
             full_text_lines.append(string)
         elif index % 2 == 0:
             # Ignore it if it doesn't have letters
-            if not LETTERS.search(string):
+            m = LETTERS.search(string)
+            if not m:
                 full_text_lines.append(string)
             else:
                 # split out the leading whitespace and trailing
                 leading_whitespace, message, trailing_whitespace = split_trailing_space(string)
                 full_text_lines.append(leading_whitespace)
 
+                # Find location of first letter
+                lineno, charpos = location(template, offset+m.span()[0])
+
                 if any(r.match(message) for r in accept):
+                    full_text_lines.append(message)
+                elif lineno in ignore_lines:
                     full_text_lines.append(message)
                 elif force:
                     full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
@@ -166,6 +175,7 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
                         full_text_lines.append(message)
                         
                 full_text_lines.append(trailing_whitespace)
+        offset += len(string)
 
     full_text = "".join(full_text_lines)
     if overwrite:
@@ -176,9 +186,20 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
     print("Fully translated! Saved as: %s" % save_filename)
 
 
+def find_ignored_lines(template):
+    lines = set()
+    for m in re.finditer(r'{#\s*notrans\s*#}', template):
+        offset = m.span()[0]
+        lineno, charpos = location(template, offset)
+        lines.add(lineno)
+    return lines
+
+
 def non_translated_text(template):
 
     offset = 0
+
+    ignore_lines = find_ignored_lines(template)
 
     # Find the parts of the template that don't match this regex
     # taken from http://www.technomancy.org/python/strings-that-dont-match-regex/
@@ -186,11 +207,17 @@ def non_translated_text(template):
         if index % 2 == 0:
 
             # Ignore it if it doesn't have letters
-            if LETTERS.search(match):
-                lineno, charpos = location(template, offset)
+            m = LETTERS.search(match)
+            if m:
+                # Get location of first letter
+                lineno, charpos = location(template, offset+m.span()[0])
+                if lineno in ignore_lines:
+                    offset += len(match)
+                    continue
                 yield (lineno, charpos, match.strip().replace("\n", "").replace("\r", "")[:120])
 
         offset += len(match)
+
 
 def print_strings(filename, accept=[]):
     with open(filename) as fp:
