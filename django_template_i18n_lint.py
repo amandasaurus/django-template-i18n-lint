@@ -106,7 +106,7 @@ GOOD_STRINGS = re.compile(
     re.MULTILINE | re.DOTALL | re.VERBOSE | re.IGNORECASE)
 
 # Stops us matching non-letter parts, e.g. just hypens, full stops etc.
-LETTERS = re.compile("\w")
+LETTERS = re.compile(r"[^\W\d_]")
 
 LEADING_TRAILING_WHITESPACE = re.compile("(^\W+|\W+$)")
 
