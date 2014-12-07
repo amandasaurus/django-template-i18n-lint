@@ -55,7 +55,7 @@ GOOD_STRINGS = re.compile(
 
          # Any html attribute that's not value or title (single quote, double quote and html5 quoteless)
          # NB at the start we want to grab any trailing quote from the previous attribute
-        |(?:['"]\W+)?[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=(?:'[^']*?'|"[^"]*?"|[a-zA-Z]+)
+        |(?:['"]\W+)?[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=(?:'(?:{{.*?}}|{%.*?%}|[^']*)'|"(?:{{.*?}}|{%.*?%}|[^"]*)+"|[a-zA-Z]+)
 
          # The actual alt/value/title tag itself cannot be translated, but the value should be
          # Treat data-title/data-original-title etc as equivalanets. Think this is some bootstrap thing & HTML5
