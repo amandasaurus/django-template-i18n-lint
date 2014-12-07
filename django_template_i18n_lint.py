@@ -136,7 +136,7 @@ def split_trailing_space(string):
 
 
 
-def replace_strings(filename, overwrite=False, force=False):
+def replace_strings(filename, overwrite=False, force=False, accept=[]):
     full_text_lines = []
     with open(filename) as fp:
         content = fp.read()
@@ -152,8 +152,10 @@ def replace_strings(filename, overwrite=False, force=False):
                 # split out the leading whitespace and trailing
                 leading_whitespace, message, trailing_whitespace = split_trailing_space(string)
                 full_text_lines.append(leading_whitespace)
-                
-                if force:
+
+                if any(r.match(message) for r in accept):
+                    full_text_lines.append(message)
+                elif force:
                     full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
                     
                 else:
@@ -190,12 +192,14 @@ def non_translated_text(template):
 
         offset += len(match)
 
-
-def print_strings(filename):
+def print_strings(filename, accept=[]):
     with open(filename) as fp:
         file_contents = fp.read()
 
     for lineno, charpos, message in non_translated_text(file_contents):
+        if any(r.match(message) for r in accept):
+            continue
+
         print("%s:%s:%s:%s" % (filename, lineno, charpos, message))
 
 
@@ -219,6 +223,8 @@ def main():
                       help="Force to replace string with no questions", default=False)
     parser.add_option("-e", "--exclude", action="append", dest="exclude_filename",
                       help="Exclude these filenames from being linted", default=[])
+    parser.add_option("-x", "--accept", action="append", dest="accept",
+                      help="Exclude these regexes from results", default=[])
     (options, args) = parser.parse_args()
 
     # Create a list of files to check
@@ -231,11 +237,13 @@ def main():
         else:
             files.append(arg)
 
+    accept_regexes = [re.compile(r) for r in options.accept]
+
     for filename in files:
         if options.replace:
-            replace_strings(filename, overwrite=True, force=options.force)
+            replace_strings(filename, overwrite=True, force=options.force, accept=accept_regexes)
         else:
-            print_strings(filename)
+            print_strings(filename, accept=accept_regexes)
 
 if __name__ == '__main__':
     main()
