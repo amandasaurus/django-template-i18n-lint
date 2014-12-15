@@ -50,7 +50,7 @@ class DjangoTemplateI18nLintTestCase(unittest.TestCase):
     testIssue17a = _known_good_output("<input type=\"submit\" value=\"Confirm\" class=\"btn btn-danger\" />", [(1, 29, 'Confirm')])
     testIssue17b = _known_good_output('<li><a href="https://twitter.com/localunews" class="icon-twitter" rel="tooltip" title="" data-placement="top" data-original-title="Twitter"><i class="fa fa-twitter"></i></a></li>', [(1, 132, 'Twitter')])
 
-    testAngularTemplate = _known_good_output('Foo [[yoyo]] bar', [(1, 1, 'Foo'), (1, 13, 'bar')])
+    testAngularTemplate = _known_good_output('Foo [[yoyo]] bar', [(1, 1, 'Foo'), (1, 14, 'bar')])
 
     testAlt1 = _known_good_output("<img src=foo.jpg alt='Photo'>", [(1, 21, 'Photo')])
     testAlt2 = _known_good_output("<img src=foo.jpg alt='{% get_title %}'>", [])
