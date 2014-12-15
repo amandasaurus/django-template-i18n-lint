@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="django-template-i18n-lint",
-    version="1.1.2",
+    version="1.2.0",
     author="Rory McCann",
     author_email="rory@technomancy.org",
     py_modules=['django_template_i18n_lint'],
