@@ -52,10 +52,13 @@ class DjangoTemplateI18nLintTestCase(unittest.TestCase):
 
     testAngularTemplate = _known_good_output('Foo [[yoyo]] bar', [(1, 1, 'Foo'), (1, 14, 'bar')])
 
-    testAlt1 = _known_good_output("<img src=foo.jpg alt='Photo'>", [(1, 21, 'Photo')])
-    testAlt2 = _known_good_output("<img src=foo.jpg alt='{% get_title %}'>", [])
-    testAlt3 = _known_good_output('<img src="foo.jpg" alt="Photo">', [(1, 25, 'Photo')])
-    testAlt4 = _known_good_output('<img src=\'foo.jpg\' alt="Photo">', [(1, 25, 'Photo')])
+    testAlt1 = _known_good_output("<img src=foo.jpg alt='Photo'>", [(1, 23, 'Photo')])
+    testAlt2 = _known_good_output("<img src=foo.jpg alt=\"Photo\">", [(1, 23, 'Photo')])
+    testAlt3 = _known_good_output("<img src=foo.jpg alt='{% get_title %}'>", [])
+    testAlt4 = _known_good_output('<img src="foo.jpg" alt="Photo">', [(1, 25, 'Photo')])
+    testAlt5 = _known_good_output('<img src=\'foo.jpg\' alt="Photo">', [(1, 25, 'Photo')])
+    testAlt6 = _known_good_output("<img src=foo.jpg alt=Photo>", [(1, 22, 'Photo')])
+    testAlt7 = _known_good_output("<img alt=Photo>", [(1, 10, 'Photo')])
 
 if __name__ == '__main__':
     unittest.main()
