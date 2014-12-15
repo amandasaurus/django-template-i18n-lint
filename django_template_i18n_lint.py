@@ -80,6 +80,9 @@ GOOD_STRINGS = re.compile(
          # any django template tag
         |{%.*?%}
 
+         # any angular.js template
+        |\[\[.*?\]\]
+
          # HTML doctype
         |<!DOCTYPE.*?>
 
