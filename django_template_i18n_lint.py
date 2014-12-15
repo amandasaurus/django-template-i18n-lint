@@ -55,7 +55,7 @@ GOOD_STRINGS = re.compile(
 
          # Any html attribute that's not value or title (single quote, double quote and html5 quoteless)
          # NB at the start we want to grab any trailing quote from the previous attribute
-        |(?:['"]\W+)?[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=(?:'[^']*?'|"[^"]*?"|[a-zA-Z]+)
+        |(?:['"]\W+)?[a-z:-]+?(?<!alt)(?<!value)(?<!title)(?<!summary)=(?:'(?:{{.*?}}|{%.*?%}|[^']*)'|"(?:{{.*?}}|{%.*?%}|[^"]*)+"|[a-zA-Z]+)
 
          # The actual alt/value/title tag itself cannot be translated, but the value should be
          # Treat data-title/data-original-title etc as equivalanets. Think this is some bootstrap thing & HTML5
@@ -109,7 +109,7 @@ GOOD_STRINGS = re.compile(
     re.MULTILINE | re.DOTALL | re.VERBOSE | re.IGNORECASE)
 
 # Stops us matching non-letter parts, e.g. just hypens, full stops etc.
-LETTERS = re.compile("\w")
+LETTERS = re.compile(r"[^\W\d_]")
 
 LEADING_TRAILING_WHITESPACE = re.compile("(^\W+|\W+$)")
 
@@ -139,24 +139,35 @@ def split_trailing_space(string):
 
 
 
-def replace_strings(filename, overwrite=False, force=False):
+def replace_strings(filename, overwrite=False, force=False, accept=[]):
     full_text_lines = []
     with open(filename) as fp:
         content = fp.read()
+
+    offset = 0
+    ignore_lines = find_ignored_lines(content)
 
     for index, string in split_into_good_and_bad(content):
         if index % 2 == 1:
             full_text_lines.append(string)
         elif index % 2 == 0:
             # Ignore it if it doesn't have letters
-            if not LETTERS.search(string):
+            m = LETTERS.search(string)
+            if not m:
                 full_text_lines.append(string)
             else:
                 # split out the leading whitespace and trailing
                 leading_whitespace, message, trailing_whitespace = split_trailing_space(string)
                 full_text_lines.append(leading_whitespace)
-                
-                if force:
+
+                # Find location of first letter
+                lineno, charpos = location(template, offset+m.span()[0])
+
+                if any(r.match(message) for r in accept):
+                    full_text_lines.append(message)
+                elif lineno in ignore_lines:
+                    full_text_lines.append(message)
+                elif force:
                     full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
                     
                 else:
@@ -167,6 +178,7 @@ def replace_strings(filename, overwrite=False, force=False):
                         full_text_lines.append(message)
                         
                 full_text_lines.append(trailing_whitespace)
+        offset += len(string)
 
     full_text = "".join(full_text_lines)
     if overwrite:
@@ -177,9 +189,20 @@ def replace_strings(filename, overwrite=False, force=False):
     print("Fully translated! Saved as: %s" % save_filename)
 
 
+def find_ignored_lines(template):
+    lines = set()
+    for m in re.finditer(r'{#\s*notrans\s*#}', template):
+        offset = m.span()[0]
+        lineno, charpos = location(template, offset)
+        lines.add(lineno)
+    return lines
+
+
 def non_translated_text(template):
 
     offset = 0
+
+    ignore_lines = find_ignored_lines(template)
 
     # Find the parts of the template that don't match this regex
     # taken from http://www.technomancy.org/python/strings-that-dont-match-regex/
@@ -187,18 +210,26 @@ def non_translated_text(template):
         if index % 2 == 0:
 
             # Ignore it if it doesn't have letters
-            if LETTERS.search(match):
-                lineno, charpos = location(template, offset)
+            m = LETTERS.search(match)
+            if m:
+                # Get location of first letter
+                lineno, charpos = location(template, offset+m.span()[0])
+                if lineno in ignore_lines:
+                    offset += len(match)
+                    continue
                 yield (lineno, charpos, match.strip().replace("\n", "").replace("\r", "")[:120])
 
         offset += len(match)
 
 
-def print_strings(filename):
+def print_strings(filename, accept=[]):
     with open(filename) as fp:
         file_contents = fp.read()
 
     for lineno, charpos, message in non_translated_text(file_contents):
+        if any(r.match(message) for r in accept):
+            continue
+
         print("%s:%s:%s:%s" % (filename, lineno, charpos, message))
 
 
@@ -222,6 +253,8 @@ def main():
                       help="Force to replace string with no questions", default=False)
     parser.add_option("-e", "--exclude", action="append", dest="exclude_filename",
                       help="Exclude these filenames from being linted", default=[])
+    parser.add_option("-x", "--accept", action="append", dest="accept",
+                      help="Exclude these regexes from results", default=[])
     (options, args) = parser.parse_args()
 
     # Create a list of files to check
@@ -234,11 +267,13 @@ def main():
         else:
             files.append(arg)
 
+    accept_regexes = [re.compile(r) for r in options.accept]
+
     for filename in files:
         if options.replace:
-            replace_strings(filename, overwrite=True, force=options.force)
+            replace_strings(filename, overwrite=True, force=options.force, accept=accept_regexes)
         else:
-            print_strings(filename)
+            print_strings(filename, accept=accept_regexes)
 
 if __name__ == '__main__':
     main()
