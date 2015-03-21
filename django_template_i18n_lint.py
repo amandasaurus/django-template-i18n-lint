@@ -162,7 +162,7 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
                 full_text_lines.append(leading_whitespace)
 
                 # Find location of first letter
-                lineno, charpos = location(template, offset+m.span()[0])
+                lineno, charpos = location(string, offset+m.span()[0])
 
                 if any(r.match(message) for r in accept):
                     full_text_lines.append(message)
@@ -170,14 +170,14 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
                     full_text_lines.append(message)
                 elif force:
                     full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
-                    
+
                 else:
-                    change = raw_input("Make %r translatable? [Y/n] " % message)                
+                    change = raw_input("Make %r translatable? [Y/n] " % message)
                     if change == 'y' or change == "":
                         full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
                     else:
                         full_text_lines.append(message)
-                        
+
                 full_text_lines.append(trailing_whitespace)
         offset += len(string)
 
