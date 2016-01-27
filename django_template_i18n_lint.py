@@ -265,7 +265,7 @@ def main():
     for arg in args:
         if os.path.isdir(arg):
             files = filenames_to_work_on(arg, options.exclude_filename)
-        else:
+        elif arg not in options.exclude_filename:
             files.append(arg)
 
     accept_regexes = [re.compile(r) for r in options.accept]
