@@ -172,7 +172,10 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
                     full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
 
                 else:
-                    change = raw_input("Make %r translatable? [Y/n] " % message)
+                    # Support Python 3.x
+                    try: input = raw_input
+                    except NameError: pass
+                    change = input("Make %r translatable? [Y/n] " % message)
                     if change == 'y' or change == "":
                         full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
                     else:
