@@ -3,7 +3,7 @@ python:
   - "2.7"
   - "3.3"
 install:
-    - pip install coveralls --use-mirrors
+    - pip install coveralls
 # command to run tests
 script:
   coverage run --source=django_template_i18n_lint setup.py test
