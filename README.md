@@ -6,16 +6,24 @@ Django Template i18n lint
 [![PyPI version](https://pypip.in/v/django-template-i18n-lint/badge.png)](https://pypi.python.org/pypi/django-template-i18n-lint)
 [![PyPI Downloads](https://pypip.in/d/django-template-i18n-lint/badge.png)](https://pypi.python.org/pypi/django-template-i18n-lint)
 
+Fork of original project by Rory McCann, [https://github.com/rory/django-template-i18n-lint](https://github.com/rory/django-template-i18n-lint), description by original author: [Lint tool to find non-i18n strings in a django template](http://www.technomancy.org/python/django-template-i18n-lint/)
+
 
 A simple script to find non-i18n text in a Django template.
 
-It can also automatically wrap the strings in `{% trans "" %}` tags, by running it with the `-r` command-line flag.
-The translation will be written to a new file, `<filename>_translated.html`.
+* native Django translation `{% trans 'x' %}` and `{% blocktrans %}`
 
-For more info see [Lint tool to find non-i18n strings in a django template](http://www.technomancy.org/python/django-template-i18n-lint/)
+Usage:
+======
 
-Code is copyright Rory McCann 2013, and dual licenced under the GNU GPL version3 (or at your option a later version), and the BSD licence. See the files LICENCE.GPLv3 and LICENCE.BSD for more information
+    $ python django_angular_template_i18n_lint.py template_files
+
+Program docs are available:
+
+    $ python django_angular_template_i18n_lint --h
 
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/rory/django-template-i18n-lint/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+Usefull hints:
+==============
 
+Putting `{# notrans #}` or `<!-- notrans -->` at the begining of line will prevent that line from showin in the results.
