@@ -60,7 +60,7 @@ GOOD_STRINGS = re.compile(
 
          # The actual alt/value/title tag itself cannot be translated, but the value should be
          # Treat data-title/data-original-title etc as equivalanets. Think this is some bootstrap thing & HTML5
-        |(?:['"]\W+)?(?:data-|data-original-)?(?:alt|value|title|summary)=['"]?
+        |(?:['"]\W+)?(?:data-|data-original-)?(?:alt|value|title|summary|placeholder)=['"]?
 
          # Boolean attributes
         |<[^<>]+?(?:checked|selected|disabled|readonly|multiple|ismap|defer|async|declare|noresize|nowrap|noshade|compact|hidden|itemscope|autofocus|autoplay|controls|download)[^<>]*?>
