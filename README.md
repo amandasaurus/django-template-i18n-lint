@@ -26,4 +26,8 @@ Program docs are available:
 Usefull hints:
 ==============
 
-Putting `{# notrans #}` or `<!-- notrans -->` at the begining of line will prevent that line from showin in the results.
+Putting `{# notrans #}` or `<!-- notrans -->` on, or before a line will prevent
+that line from showing in the results.
+
+Putting `{# notrans file #}` anywhere within a file, will prevent that file from
+showing in the results.

@@ -147,6 +147,8 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
 
     offset = 0
     ignore_lines = find_ignored_lines(content)
+    if find_ignore_file(template):
+        return
 
     for index, string in split_into_good_and_bad(content):
         if index % 2 == 1:
@@ -190,12 +192,25 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
     print("Fully translated! Saved as: %s" % save_filename)
 
 
+def find_ignore_file(template):
+    for m in re.finditer(r'{#\s*notrans file\s*#}', template):
+        return True
+    return False
+
+
 def find_ignored_lines(template):
     lines = set()
+    # On-line ignore
     for m in re.finditer(r'{#\s*notrans\s*#}', template):
         offset = m.span()[0]
         lineno, charpos = location(template, offset)
         lines.add(lineno)
+    # Pre-line ignore
+    for m in re.finditer(r'^\s*{#\s*notrans\s*#}\s*$', template):
+        offset = m.span()[0]
+        lineno, charpos = location(template, offset)
+        lines.add(lineno)
+        lines.add(lineno+1)
     return lines
 
 
@@ -204,6 +219,8 @@ def non_translated_text(template):
     offset = 0
 
     ignore_lines = find_ignored_lines(template)
+    if find_ignore_file(template):
+        return
 
     # Find the parts of the template that don't match this regex
     # taken from http://www.technomancy.org/python/strings-that-dont-match-regex/
