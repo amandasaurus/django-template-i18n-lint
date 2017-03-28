@@ -206,10 +206,9 @@ def find_ignored_lines(template):
         lineno, charpos = location(template, offset)
         lines.add(lineno)
     # Pre-line ignore
-    for m in re.finditer(r'^\s*{#\s*notrans\s*#}\s*$', template):
+    for m in re.finditer(r'^\s*{#\s*notrans\s*#}\s*$', template, flags=re.MULTILINE):
         offset = m.span()[0]
         lineno, charpos = location(template, offset)
-        lines.add(lineno)
         lines.add(lineno+1)
     return lines
 
