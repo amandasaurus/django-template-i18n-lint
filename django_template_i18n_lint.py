@@ -8,12 +8,15 @@ import re
 import sys
 from optparse import OptionParser
 
+from six.moves import input
 
-def location(str, pos):
-    """Given a string str and an integer pos, find the line number and character in that line that correspond to pos"""
+
+def location(string, pos):
+    """Given a string str and an integer pos, find the line number and
+    character in that line that correspond to pos"""
     lineno, charpos = 1, 1
     counter = 0
-    for char in str:
+    for char in string:
         if counter == pos:
             return lineno, charpos
         elif char == '\n':
@@ -114,14 +117,15 @@ LETTERS = re.compile(r"[^\W\d_]")
 
 LEADING_TRAILING_WHITESPACE = re.compile("(^\W+|\W+$)")
 
+
 def split_into_good_and_bad(template):
     for index, match in enumerate(GOOD_STRINGS.split(template)):
         yield (index, match)
 
 
-
 def split_trailing_space(string):
-    """Given a string, returns a tuple of 3 string, the leading whitespace, middle, and trailing whitespace"""
+    """Given a string, returns a tuple of 3 string, the leading whitespace,
+    middle, and trailing whitespace"""
     results = LEADING_TRAILING_WHITESPACE.split(string)
     if len(results) == 1:
         # no spaces
@@ -139,10 +143,10 @@ def split_trailing_space(string):
         raise NotImplementedError("Unknown case: %r %r" % (string, results))
 
 
-
 def replace_strings(filename, overwrite=False, force=False, accept=[]):
     full_text_lines = []
-    with open(filename) as fp:
+    print('Translating ' + filename)
+    with open(filename, encoding='utf-8') as fp:
         content = fp.read()
 
     offset = 0
@@ -172,7 +176,7 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
                     full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
 
                 else:
-                    change = raw_input("Make %r translatable? [Y/n] " % message)
+                    change = input("Make %r translatable? [Y/n] " % message)
                     if change == 'y' or change == "":
                         full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
                     else:
@@ -216,19 +220,19 @@ def non_translated_text(template):
                 if lineno in ignore_lines:
                     offset += len(match)
                     continue
-                yield (lineno, charpos, match.strip().replace("\n", "").replace("\r", "")[:120])
+                yield (lineno, charpos, match.strip().replace("\n", "")
+                       .replace("\r", "")[:120])
 
         offset += len(match)
 
 
 def print_strings(filename, accept=[]):
-    with open(filename) as fp:
+    with open(filename, encoding='utf-8') as fp:
         file_contents = fp.read()
 
     for lineno, charpos, message in non_translated_text(file_contents):
         if any(r.match(message) for r in accept):
             continue
-
         print("%s:%s:%s:%s" % (filename, lineno, charpos, message))
 
 
@@ -270,9 +274,11 @@ def main():
 
     for filename in files:
         if options.replace:
-            replace_strings(filename, overwrite=True, force=options.force, accept=accept_regexes)
+            replace_strings(filename, overwrite=True, force=options.force,
+                            accept=accept_regexes)
         else:
             print_strings(filename, accept=accept_regexes)
+
 
 if __name__ == '__main__':
     main()
