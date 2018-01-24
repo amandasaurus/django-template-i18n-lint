@@ -186,6 +186,21 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
         offset += len(string)
 
     full_text = "".join(full_text_lines)
+
+    if (re.search(r'({%\s*trans\s*.*)', full_text) and
+            not re.search(r'({%\s*load.*(?=i18n).*%})', full_text)):
+        first_load_tag = (
+            re.search(r'({%\s*load\s*[a-zA-Z0-9]*\s*%})', full_text)
+        )
+        if first_load_tag:
+            first_load_tag = first_load_tag.group(1)
+            load_tag_tokens = first_load_tag.split(' ')
+            load_tag_tokens.insert(-1, 'i18n')
+            first_load_tag_i18n = ' '.join(load_tag_tokens)
+            full_text = full_text.replace(
+                first_load_tag, first_load_tag_i18n, 1)
+        else:
+            full_text = '{% load i18n %}\n' + content
     if overwrite:
         save_filename = filename
     else:
@@ -241,21 +256,29 @@ def filenames_to_work_on(directory, exclude_filenames):
     files = []
     for dirpath, dirs, filenames in os.walk(directory):
         files.extend(os.path.join(dirpath, fname)
-                        for fname in filenames
-                        if (fname.endswith('.html') or fname.endswith('.txt')) and fname not in exclude_filenames)
+                     for fname in filenames
+                     if (fname.endswith('.html') or fname.endswith('.txt'))
+                         and fname not in exclude_filenames)
     return files
 
 
 def main():
     parser = OptionParser(usage="usage: %prog [options] <filenames>")
     parser.add_option("-r", "--replace", action="store_true", dest="replace",
-                      help="Ask to replace the strings in the file.", default=False)
-    parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite",
-                      help="When replacing the strings, overwrite the original file.  If not specified, the file will be saved in a seperate file named X_translated.html", default=False)
+                      help="Ask to replace the strings in the file.",
+                      default=False)
+    parser.add_option("-o", "--overwrite", action="store_true",
+                      dest="overwrite",
+                      help="When replacing the strings, overwrite the original"
+                      " file.  If not specified, the file will be saved in a"
+                      "seperate file named X_translated.html", default=False)
     parser.add_option("-f", "--force", action="store_true", dest="force",
-                      help="Force to replace string with no questions", default=False)
-    parser.add_option("-e", "--exclude", action="append", dest="exclude_filename",
-                      help="Exclude these filenames from being linted", default=[])
+                      help="Force to replace string with no questions",
+                      default=False)
+    parser.add_option("-e", "--exclude", action="append",
+                      dest="exclude_filename",
+                      help="Exclude these filenames from being linted",
+                      default=[])
     parser.add_option("-x", "--accept", action="append", dest="accept",
                       help="Exclude these regexes from results", default=[])
     (options, args) = parser.parse_args()
