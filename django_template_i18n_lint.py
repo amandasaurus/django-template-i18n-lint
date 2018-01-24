@@ -200,9 +200,7 @@ def find_ignored_lines(template):
 
 
 def non_translated_text(template):
-
     offset = 0
-
     ignore_lines = find_ignored_lines(template)
 
     # Find the parts of the template that don't match this regex
