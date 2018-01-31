@@ -8,12 +8,15 @@ import re
 import sys
 from optparse import OptionParser
 
+from six.moves import input
 
-def location(str, pos):
-    """Given a string str and an integer pos, find the line number and character in that line that correspond to pos"""
+
+def location(string, pos):
+    """Given a string str and an integer pos, find the line number and
+    character in that line that correspond to pos"""
     lineno, charpos = 1, 1
     counter = 0
-    for char in str:
+    for char in string:
         if counter == pos:
             return lineno, charpos
         elif char == '\n':
@@ -114,14 +117,15 @@ LETTERS = re.compile(r"[^\W\d_]")
 
 LEADING_TRAILING_WHITESPACE = re.compile("(^\W+|\W+$)")
 
+
 def split_into_good_and_bad(template):
     for index, match in enumerate(GOOD_STRINGS.split(template)):
         yield (index, match)
 
 
-
 def split_trailing_space(string):
-    """Given a string, returns a tuple of 3 string, the leading whitespace, middle, and trailing whitespace"""
+    """Given a string, returns a tuple of 3 string, the leading whitespace,
+    middle, and trailing whitespace"""
     results = LEADING_TRAILING_WHITESPACE.split(string)
     if len(results) == 1:
         # no spaces
@@ -139,10 +143,10 @@ def split_trailing_space(string):
         raise NotImplementedError("Unknown case: %r %r" % (string, results))
 
 
-
 def replace_strings(filename, overwrite=False, force=False, accept=[]):
     full_text_lines = []
-    with open(filename) as fp:
+    print('Translating ' + filename)
+    with open(filename, encoding='utf-8') as fp:
         content = fp.read()
 
     offset = 0
@@ -172,7 +176,7 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
                     full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
 
                 else:
-                    change = raw_input("Make %r translatable? [Y/n] " % message)
+                    change = input("Make %r translatable? [Y/n] " % message)
                     if change == 'y' or change == "":
                         full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
                     else:
@@ -182,6 +186,21 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
         offset += len(string)
 
     full_text = "".join(full_text_lines)
+
+    if (re.search(r'({%\s*trans\s*.*)', full_text) and
+            not re.search(r'({%\s*load.*(?=i18n).*%})', full_text)):
+        first_load_tag = (
+            re.search(r'({%\s*load\s*[a-zA-Z0-9]*\s*%})', full_text)
+        )
+        if first_load_tag:
+            first_load_tag = first_load_tag.group(1)
+            load_tag_tokens = first_load_tag.split(' ')
+            load_tag_tokens.insert(-1, 'i18n')
+            first_load_tag_i18n = ' '.join(load_tag_tokens)
+            full_text = full_text.replace(
+                first_load_tag, first_load_tag_i18n, 1)
+        else:
+            full_text = '{% load i18n %}\n' + content
     if overwrite:
         save_filename = filename
     else:
@@ -200,9 +219,7 @@ def find_ignored_lines(template):
 
 
 def non_translated_text(template):
-
     offset = 0
-
     ignore_lines = find_ignored_lines(template)
 
     # Find the parts of the template that don't match this regex
@@ -218,19 +235,19 @@ def non_translated_text(template):
                 if lineno in ignore_lines:
                     offset += len(match)
                     continue
-                yield (lineno, charpos, match.strip().replace("\n", "").replace("\r", "")[:120])
+                yield (lineno, charpos, match.strip().replace("\n", "")
+                       .replace("\r", "")[:120])
 
         offset += len(match)
 
 
 def print_strings(filename, accept=[]):
-    with open(filename) as fp:
+    with open(filename, encoding='utf-8') as fp:
         file_contents = fp.read()
 
     for lineno, charpos, message in non_translated_text(file_contents):
         if any(r.match(message) for r in accept):
             continue
-
         print("%s:%s:%s:%s" % (filename, lineno, charpos, message))
 
 
@@ -239,21 +256,29 @@ def filenames_to_work_on(directory, exclude_filenames):
     files = []
     for dirpath, dirs, filenames in os.walk(directory):
         files.extend(os.path.join(dirpath, fname)
-                        for fname in filenames
-                        if (fname.endswith('.html') or fname.endswith('.txt')) and fname not in exclude_filenames)
+                     for fname in filenames
+                     if (fname.endswith('.html') or fname.endswith('.txt'))
+                         and fname not in exclude_filenames)
     return files
 
 
 def main():
     parser = OptionParser(usage="usage: %prog [options] <filenames>")
     parser.add_option("-r", "--replace", action="store_true", dest="replace",
-                      help="Ask to replace the strings in the file.", default=False)
-    parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite",
-                      help="When replacing the strings, overwrite the original file.  If not specified, the file will be saved in a seperate file named X_translated.html", default=False)
+                      help="Ask to replace the strings in the file.",
+                      default=False)
+    parser.add_option("-o", "--overwrite", action="store_true",
+                      dest="overwrite",
+                      help="When replacing the strings, overwrite the original"
+                      " file.  If not specified, the file will be saved in a"
+                      "seperate file named X_translated.html", default=False)
     parser.add_option("-f", "--force", action="store_true", dest="force",
-                      help="Force to replace string with no questions", default=False)
-    parser.add_option("-e", "--exclude", action="append", dest="exclude_filename",
-                      help="Exclude these filenames from being linted", default=[])
+                      help="Force to replace string with no questions",
+                      default=False)
+    parser.add_option("-e", "--exclude", action="append",
+                      dest="exclude_filename",
+                      help="Exclude these filenames from being linted",
+                      default=[])
     parser.add_option("-x", "--accept", action="append", dest="accept",
                       help="Exclude these regexes from results", default=[])
     (options, args) = parser.parse_args()
@@ -272,9 +297,11 @@ def main():
 
     for filename in files:
         if options.replace:
-            replace_strings(filename, overwrite=True, force=options.force, accept=accept_regexes)
+            replace_strings(filename, overwrite=True, force=options.force,
+                            accept=accept_regexes)
         else:
             print_strings(filename, accept=accept_regexes)
+
 
 if __name__ == '__main__':
     main()
