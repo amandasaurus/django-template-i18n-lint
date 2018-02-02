@@ -292,7 +292,7 @@ def parse_argv():
         dest="accept",
         help="Exclude these regexes from results",
         default=[])
-    (options, args) = parser.parse_args()
+    return parser.parse_args()
 
 
 def main(options, args):
