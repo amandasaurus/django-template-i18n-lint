@@ -232,12 +232,17 @@ def non_translated_text(template):
     # Find the parts of the template that don't match this regex
     # taken from http://www.technomancy.org/python/strings-that-dont-match-regex/
     for index, match in split_into_good_and_bad(template):
+        # ignore matched parts
         if index % 2 == 1:
+            offset += len(match)
             continue
+
         # Ignore it if it doesn't have letters
         letters_match = LETTERS.search(match)
         if not letters_match:
+            offset += len(match)
             continue
+
         # Get location of first letter
         lineno, charpos = location(template, offset + letters_match.span()[0])
         if lineno in ignore_lines:
