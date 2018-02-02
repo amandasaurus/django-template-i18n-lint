@@ -3,6 +3,7 @@
 Prints out all
 """
 
+import html
 import os
 import re
 from optparse import OptionParser
@@ -115,6 +116,8 @@ GOOD_STRINGS = re.compile(
 LETTERS = re.compile(r"[^\W\d_]")
 
 LEADING_TRAILING_WHITESPACE = re.compile("(^\W+|\W+$)")
+
+HTML_ENTITIES = re.compile(r"\&[a-zA-Z]+\;")
 
 
 def split_into_good_and_bad(template):
@@ -234,14 +237,16 @@ def non_translated_text(template):
         offset += len(match)
 
 
-def print_strings(filename, accept=[]):
+def print_strings(filename, accept=None):
+    if accept is None:
+        accept = []
+
     with open(filename) as fp:
         file_contents = fp.read()
 
     for lineno, charpos, message in non_translated_text(file_contents):
         if any(r.match(message) for r in accept):
             continue
-
         print("%s:%s:%s:%s" % (filename, lineno, charpos, message))
 
 
@@ -254,6 +259,15 @@ def filenames_to_work_on(directory, exclude_filenames):
                 if fname not in exclude_filenames:
                     files.append(os.path.join(dirpath, fname))
     return files
+
+
+def replace_html_entities(filename):
+    with open(filename) as fp:
+        content = fp.read()
+    for entity in set(HTML_ENTITIES.findall(content)):
+        content = content.replace(entity, html.unescape(entity))
+    with open(filename, 'w') as fp:
+        fp.write(content)
 
 
 def parse_argv():
@@ -292,6 +306,12 @@ def parse_argv():
         dest="accept",
         help="Exclude these regexes from results",
         default=[])
+    parser.add_option(
+        "-s", "--specialchars",
+        action="store_true",
+        dest="specialchars",
+        help="Replace all HTML entities to UTF-8.",
+        default=False)
     return parser.parse_args()
 
 
@@ -309,6 +329,8 @@ def main(options, args):
     accept_regexes = [re.compile(r) for r in options.accept]
 
     for filename in files:
+        if options.specialchars:
+            replace_html_entities(filename)
         if options.replace:
             replace_strings(filename, overwrite=True, force=options.force, accept=accept_regexes)
         else:
