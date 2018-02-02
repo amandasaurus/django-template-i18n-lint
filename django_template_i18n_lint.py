@@ -90,6 +90,9 @@ GOOD_STRINGS = re.compile(
          # HTML doctype
         |<!DOCTYPE.*?>
 
+         # Bootstrap 3
+        |data\-formset\-[a-z\-]+
+
          # IE specific HTML
         |<!--\[if.*?<!\[endif\]-->
 
@@ -285,6 +288,15 @@ def replace_html_entities(filename):
         fp.write(content)
 
 
+def add_load_tag(filename):
+    with open(filename) as fp:
+        content = fp.read()
+    if 'i18n' not in content:
+        if '{% trans ""' in content or '{% blocktrans' in content:
+            with open(filename, 'w') as fp:
+                fp.write('{% load i18n %}\n' + content)
+
+
 def parse_argv():
     parser = OptionParser(usage="usage: %prog [options] <filenames>")
     parser.add_option(
@@ -327,6 +339,12 @@ def parse_argv():
         dest="specialchars",
         help="Replace all HTML entities to UTF-8.",
         default=False)
+    parser.add_option(
+        "-l", "--load",
+        action="store_true",
+        dest="load",
+        help="Add `load i18n` if not already added.",
+        default=False)
     return parser.parse_args()
 
 
@@ -348,7 +366,9 @@ def main(options, args):
             replace_html_entities(filename)
         if options.replace:
             replace_strings(filename, overwrite=True, force=options.force, accept=accept_regexes)
-        else:
+        if options.load:
+            add_load_tag(filename)
+        if not options.replace:
             print_strings(filename, accept=accept_regexes)
 
 
