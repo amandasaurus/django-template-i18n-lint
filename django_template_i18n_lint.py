@@ -150,6 +150,13 @@ def split_trailing_space(string):
         raise NotImplementedError("Unknown case: %r %r" % (string, results))
 
 
+def wrap_message(message):
+    if '\n' in message:
+        return '{% blocktrans %}' + message.replace('"', '\\"') + '{% endblocktrans %}'
+    else:
+        return '{% trans "' + message.replace('"', '\\"') + '" %}'
+
+
 def replace_strings(filename, overwrite=False, force=False, accept=None):
     if accept is None:
         accept = []
@@ -186,11 +193,11 @@ def replace_strings(filename, overwrite=False, force=False, accept=None):
         elif lineno in ignore_lines:
             full_text_lines.append(message)
         elif force:
-            full_text_lines.append('{% trans "' + message.replace('"', '\\"') + '" %}')
+            full_text_lines.append(wrap_message(message))
         else:
             change = input("Make %r translatable? [Y/n] " % message).lower()
             if change in ('y', 'yes', ''):
-                full_text_lines.append('{% trans "' + message.replace('"', '\\"') + '" %}')
+                full_text_lines.append(wrap_message(message))
             else:
                 full_text_lines.append(message)
 
