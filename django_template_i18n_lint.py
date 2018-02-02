@@ -113,7 +113,7 @@ GOOD_STRINGS = re.compile(
     re.MULTILINE | re.DOTALL | re.VERBOSE | re.IGNORECASE)
 
 # Stops us matching non-letter parts, e.g. just hypens, full stops etc.
-LETTERS = re.compile(r"[^\W\d_]")
+LETTERS = re.compile(r"[^\W\d_]+")
 
 LEADING_TRAILING_WHITESPACE = re.compile("(^\W+|\W+$)")
 
@@ -175,8 +175,8 @@ def replace_strings(filename, overwrite=False, force=False, accept=None):
             continue
 
         # Ignore it if it doesn't have letters
-        m = LETTERS.search(string)
-        if not m:
+        letters_match = LETTERS.search(string)
+        if not letters_match:
             full_text_lines.append(string)
             offset += len(string)
             continue
@@ -186,7 +186,7 @@ def replace_strings(filename, overwrite=False, force=False, accept=None):
         full_text_lines.append(leading_whitespace)
 
         # Find location of first letter
-        lineno, charpos = location(string, offset+m.span()[0])
+        lineno, charpos = location(string, offset + letters_match.span()[0])
 
         if any(r.match(message) for r in accept):
             full_text_lines.append(message)
@@ -229,17 +229,18 @@ def non_translated_text(template):
     # Find the parts of the template that don't match this regex
     # taken from http://www.technomancy.org/python/strings-that-dont-match-regex/
     for index, match in split_into_good_and_bad(template):
-        if index % 2 == 0:
-
-            # Ignore it if it doesn't have letters
-            m = LETTERS.search(match)
-            if m:
-                # Get location of first letter
-                lineno, charpos = location(template, offset+m.span()[0])
-                if lineno in ignore_lines:
-                    offset += len(match)
-                    continue
-                yield (lineno, charpos, match.strip().replace("\n", "").replace("\r", "")[:120])
+        if index % 2 == 1:
+            continue
+        # Ignore it if it doesn't have letters
+        letters_match = LETTERS.search(match)
+        if not letters_match:
+            continue
+        # Get location of first letter
+        lineno, charpos = location(template, offset + letters_match.span()[0])
+        if lineno in ignore_lines:
+            offset += len(match)
+            continue
+        yield (lineno, charpos, match.strip().replace("\n", "").replace("\r", "")[:120])
 
         offset += len(match)
 
