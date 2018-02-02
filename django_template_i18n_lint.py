@@ -131,12 +131,15 @@ def split_trailing_space(string):
     if len(results) == 1:
         # no spaces
         return ('', string, '')
-    elif len(results) == 3 and results[0] == '' and results[2] != '':
-        # only leading whitespace
-        return (results[1], results[2], '')
-    elif len(results) == 3 and results[0] != '' and results[2] == '':
-        # only trailing
-        return ('', results[0], results[1])
+    elif len(results) == 3:
+        if not results[0] and results[2]:
+            # only leading whitespace
+            return (results[1], results[2], '')
+        elif results[0] and not results[2]:
+            # only trailing
+            return ('', results[0], results[1])
+        else:
+            raise NotImplementedError("Unknown case: %r %r" % (string, results))
     elif len(results) == 5:
         # leading and trailing whitespace
         return (results[1], results[2], results[3])
@@ -182,8 +185,8 @@ def replace_strings(filename, overwrite=False, force=False, accept=None):
         elif force:
             full_text_lines.append('{% trans "' + message.replace('"', '\\"') + '" %}')
         else:
-            change = raw_input("Make %r translatable? [Y/n] " % message)
-            if change == 'y' or change == "":
+            change = input("Make %r translatable? [Y/n] " % message).lower()
+            if change in ('y', 'yes', ''):
                 full_text_lines.append('{% trans "' + message.replace('"', '\\"') + '" %}')
             else:
                 full_text_lines.append(message)
