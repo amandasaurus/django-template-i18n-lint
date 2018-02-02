@@ -298,8 +298,17 @@ def add_load_tag(filename):
         content = fp.read()
     if 'i18n' not in content:
         if '{% trans ' in content or '{% blocktrans ' in content:
+            # if already have loads - add before
+            if '{% load ' in content:
+                content = content.replace('{% load ', '{% load i18n %}\n{% load ', 1)
+            # if have extends block - add after
+            elif '{% extends ' in content:
+                content = content.replace(' %}\n', ' %}\n{% load i18n %}', 1)
+            # otherwise add into begin
+            else:
+                content = '{% load i18n %}\n' + content
             with open(filename, 'w') as fp:
-                fp.write('{% load i18n %}\n' + content)
+                fp.write(content)
 
 
 def parse_argv():
