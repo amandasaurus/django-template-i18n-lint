@@ -117,7 +117,7 @@ LETTERS = re.compile(r"[^\W\d_]")
 
 LEADING_TRAILING_WHITESPACE = re.compile("(^\W+|\W+$)")
 
-HTML_ENTITIES = re.compile(r"\&[a-zA-Z]+\;")
+HTML_ENTITIES = re.compile(r"\&[a-zA-Z]{2:25}\;")
 
 
 def split_into_good_and_bad(template):
@@ -265,7 +265,11 @@ def replace_html_entities(filename):
     with open(filename) as fp:
         content = fp.read()
     for entity in set(HTML_ENTITIES.findall(content)):
-        content = content.replace(entity, html.unescape(entity))
+        replacement = html.unescape(entity)
+        # replace only 1 char
+        if len(replacement) != 1:
+            continue
+        content = content.replace(entity, replacement)
     with open(filename, 'w') as fp:
         fp.write(content)
 
