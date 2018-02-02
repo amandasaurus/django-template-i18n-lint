@@ -297,7 +297,7 @@ def add_load_tag(filename):
     with open(filename) as fp:
         content = fp.read()
     if 'i18n' not in content:
-        if '{% trans ""' in content or '{% blocktrans' in content:
+        if '{% trans ' in content or '{% blocktrans ' in content:
             with open(filename, 'w') as fp:
                 fp.write('{% load i18n %}\n' + content)
 
