@@ -29,7 +29,7 @@ def location(str, pos):
 # Things that are OK:
 GOOD_STRINGS = re.compile(
     r"""
-          # django comment
+         # django comment
        ( {%\ comment\ %}.*?{%\ endcomment\ %}
 
          # already translated text
@@ -37,6 +37,9 @@ GOOD_STRINGS = re.compile(
 
          # any django template function (catches {% trans ..) aswell
         |{%.*?%}
+        
+         # The required keyword
+        | required
 
          # CSS
         |<style.*?</style>
